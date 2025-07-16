@@ -1,16 +1,26 @@
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import {
+  LayoutDashboard,
+  Monitor,
+  Users,
+  Layers,
+  DollarSign,
+  LogOut,
+  Menu,
+  X,
+} from "lucide-react";
 import type { AppDispatch } from "../../store";
 import { logoutUser } from "../Redux/Slices/authSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
 const menuItems = [
-  "Dashboard",
-  "Users",
-  "Plans",
-  "Settings",
-  "Reports",
-  "Logout",
+  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+  { label: "Screens", icon: Monitor },
+  { label: "Users", icon: Users },
+  { label: "Plans", icon: Layers , path: "/plans" },
+  { label: "Income", icon: DollarSign },
+  { label: "Logout", icon: LogOut },
 ];
 
 const ToolBar = () => {
@@ -20,7 +30,7 @@ const ToolBar = () => {
   const navigate = useNavigate();
   const handleLogout = () => {
     dispatch(logoutUser()).then(() => navigate("/login"));
-    console.log("DONE")
+    console.log("DONE");
   };
 
   return (
@@ -42,23 +52,25 @@ const ToolBar = () => {
 
       <div className="flex flex-col gap-3 p-4 pt-0 mt-5 shadow-2xl border-gray-2000 h-full">
         <h1 className="font-bold text-xl pb-5">Admin Dashboard</h1>
-        {menuItems.map((item) => (
+        {menuItems.map(({ label, icon: Icon, path }) => (
           <button
-            key={item}
+            key={label}
             onClick={() => {
-              if (item === "Logout") {
+              if (label === "Logout") {
                 handleLogout();
               } else {
-                setSelected(item);
+                setSelected(label);
+                if (path) navigate(path);
               }
             }}
-            className={`text-left px-4 py-2 rounded-md font-medium ${
-              selected === item
+            className={`flex items-center gap-3 text-left px-4 py-2 rounded-md font-medium transition-colors ${
+              selected === label
                 ? "bg-red-600 text-white"
                 : "bg-gray-100 text-black hover:bg-red-600 hover:text-white"
             }`}
           >
-            {item}
+            <Icon size={20} />
+            {label}
           </button>
         ))}
       </div>

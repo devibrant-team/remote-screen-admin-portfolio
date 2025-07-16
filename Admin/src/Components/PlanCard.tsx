@@ -1,41 +1,67 @@
 import { Pencil, Check } from "lucide-react";
+import { fetchPlans } from "../Redux/Slices/getPlansSlice";
+import type { Plan } from "../Interface/Interfaces";
+import { useQuery } from "@tanstack/react-query";
 
 const PlanCard = () => {
+  const { data, isLoading, isError, error } = useQuery<Plan[]>({
+    queryKey: ["plans"],
+    queryFn: fetchPlans,
+  });
+
+  if (isLoading) return <p>Loading plans...</p>;
+  if (isError) return <p>Error: {(error as Error).message}</p>;
+
   return (
-    <div className="bg-[var(--white)] p-6 rounded-2xl shadow-xl border border-gray-300 hover:shadow-xl transition">
-      {/* Plan Title and Actions */}
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-xl font-semibold text-[var(--black)]">
-          Basic Plan
-        </h3>
-        <div className="flex gap-2">
-          <button className="text-blue-600 hover:text-blue-800 transition">
-            <Pencil size={18} />
-          </button>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {data?.map((plan) => (
+        <div
+          key={plan.id}
+          className="bg-[var(--white)] p-6 rounded-2xl shadow-xl border border-gray-300 hover:shadow-xl transition"
+        >
+          {/* Plan Title and Actions */}
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-xl font-semibold text-[var(--black)] capitalize">
+              {plan.name}
+            </h3>
+            <button className="text-blue-600 hover:text-blue-800 transition">
+              <Pencil size={18} />
+            </button>
+          </div>
+
+          {/* Price and Duration */}
+          <div className="mb-4">
+            <h2 className="text-lg font-bold text-[var(--mainred)]">
+              ${plan.price} / {plan.plan_time} days
+            </h2>
+            {Number(plan.offer) > 0 && (
+              <p className="text-sm text-green-600">
+                Offer: -${plan.offer}
+              </p>
+            )}
+          </div>
+
+          {/* Features */}
+          <ul className="text-gray-700 text-sm space-y-2 mb-4">
+            <li className="flex items-center gap-2">
+              <Check size={16} className="text-[var(--mainred)]" />
+              {plan.screen_number} Screens
+            </li>
+            <li className="flex items-center gap-2">
+              <Check size={16} className="text-[var(--mainred)]" />
+              {plan.storage} GB Storage
+            </li>
+          </ul>
+
+          {/* Active Users (access_num) */}
+          <p className="text-sm text-gray-600 font-medium">
+            Active Users:{" "}
+            <span className="font-bold text-[var(--black)]">
+              {plan.access_num}
+            </span>
+          </p>
         </div>
-      </div>
-
-      {/* Price */}
-      <div className="mb-4">
-        <h2 className="text-lg font-bold text-[var(--mainred)]">
-          $9.99 / 5 years
-        </h2>
-      </div>
-
-      {/* Features */}
-      <ul className="text-gray-700 text-sm space-y-2 mb-4">
-        {["5 Screens", "10Gb Storage"].map((item, idx) => (
-          <li key={idx} className="flex items-center gap-2">
-            <Check size={16} className="text-[var(--mainred)]" />
-            {item}
-          </li>
-        ))}
-      </ul>
-
-      {/* Active Users */}
-      <p className="text-sm text-gray-600 font-medium">
-        Active Users: <span className="font-bold text-[var(--black)]">847</span>
-      </p>
+      ))}
     </div>
   );
 };
