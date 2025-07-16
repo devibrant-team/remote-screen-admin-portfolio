@@ -3,7 +3,9 @@ import BaseModal from "./BaseModal";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { useDispatch, useSelector, type UseDispatch } from "react-redux";
+import type { AppDispatch, RootState } from "../../../store";
+import { insertPlan } from "../../Redux/Slices/addPlanSlice";
 type PlanModalProps = {
   open: boolean;
   onClose: () => void;
@@ -12,15 +14,21 @@ type PlanModalProps = {
 // 1. Define Zod schema
 const planSchema = z.object({
   name: z.string().nonempty("Name is required"),
-  screens: z.number().min(1, "Screens must be at least 1"),
-  years: z.number().min(1, "Years must be at least 1"),
+  screen_number: z.number().min(1, "Screens must be at least 1"),
+  plan_time: z.number().min(1, "Years must be at least 1"),
   storage: z.number().min(1, "Storage must be at least 1"),
   price: z.number().min(1, "Price must be at least 1"),
-  isPopular: z.boolean().optional(),
+  is_recommended: z.boolean().optional(),
+  offer:0,
 });
 type PlanFormValues = z.infer<typeof planSchema>;
 
 const PlanModal: React.FC<PlanModalProps> = ({ open, onClose }) => {
+  const [successMessage, setSuccessMessage] = React.useState("");
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error, success } = useSelector(
+    (state: RootState) => state.plans
+  );
   const {
     register,
     handleSubmit,
@@ -30,18 +38,25 @@ const PlanModal: React.FC<PlanModalProps> = ({ open, onClose }) => {
     resolver: zodResolver(planSchema),
     defaultValues: {
       name: "",
-      screens: 1,
-      years: 1,
+      screen_number: 1,
+      plan_time: 1,
       storage: 1,
       price: 1,
-      isPopular: false,
+      is_recommended: false,
+      offer:0,
     },
   });
 
-  const onSubmit = (data: PlanFormValues) => {
-    console.log("Submitted Plan:", data);
-    reset();
-    onClose();
+  const onSubmit = async (data: PlanFormValues) => {
+  const result = await dispatch(insertPlan({ ...data, offer: 0 }));
+
+
+    if (insertPlan.fulfilled.match(result)) {
+      reset();
+      onClose();
+    } else {
+      console.error("Error submitting plan:", result.payload);
+    }
   };
 
   return (
@@ -69,12 +84,12 @@ const PlanModal: React.FC<PlanModalProps> = ({ open, onClose }) => {
           </label>
           <input
             type="number"
-            {...register("screens", { valueAsNumber: true })}
+            {...register("screen_number", { valueAsNumber: true })}
             className="w-full border p-2 rounded-md"
             min={1}
           />
-          {errors.screens && (
-            <p className="text-sm text-red-500">{errors.screens.message}</p>
+          {errors.screen_number && (
+            <p className="text-sm text-red-500">{errors.screen_number.message}</p>
           )}
         </div>
 
@@ -85,12 +100,12 @@ const PlanModal: React.FC<PlanModalProps> = ({ open, onClose }) => {
           </label>
           <input
             type="number"
-            {...register("years", { valueAsNumber: true })}
+            {...register("plan_time", { valueAsNumber: true })}
             className="w-full border p-2 rounded-md"
             min={1}
           />
-          {errors.years && (
-            <p className="text-sm text-red-500">{errors.years.message}</p>
+          {errors.plan_time && (
+            <p className="text-sm text-red-500">{errors.plan_time.message}</p>
           )}
         </div>
 
@@ -130,7 +145,7 @@ const PlanModal: React.FC<PlanModalProps> = ({ open, onClose }) => {
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            {...register("isPopular")}
+            {...register("is_recommended")}
             className="accent-[var(--mainred)] w-5 h-5"
           />
           <label className="text-sm font-medium text-gray-700">
@@ -140,11 +155,17 @@ const PlanModal: React.FC<PlanModalProps> = ({ open, onClose }) => {
 
         <button
           type="submit"
-          className="bg-[var(--mainred)] text-white px-4 py-2 rounded-md hover:brightness-90 transition"
+          disabled={loading}
+          className="bg-[var(--mainred)] text-white px-4 py-2 rounded-md hover:brightness-90 transition disabled:opacity-50"
         >
-          Save
+          {loading ? "Saving..." : "Save"}
         </button>
       </form>
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-md text-sm">
+          {successMessage}
+        </div>
+      )}
     </BaseModal>
   );
 };

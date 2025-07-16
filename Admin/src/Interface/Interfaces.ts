@@ -11,3 +11,12 @@ export interface Plan {
   created_at: string | null;
   updated_at: string | null;
 }
+export interface PlanFormData {
+  name: string;
+  screen_number: number;
+  plan_time: number;
+  storage: number;
+  price: number;
+  is_recommended?: boolean;
+  offer?: number;
+}
