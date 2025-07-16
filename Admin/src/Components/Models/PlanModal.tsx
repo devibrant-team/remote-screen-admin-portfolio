@@ -19,7 +19,6 @@ const planSchema = z.object({
   storage: z.number().min(1, "Storage must be at least 1"),
   price: z.number().min(1, "Price must be at least 1"),
   is_recommended: z.boolean().optional(),
-  offer:0,
 });
 type PlanFormValues = z.infer<typeof planSchema>;
 
@@ -43,7 +42,7 @@ const PlanModal: React.FC<PlanModalProps> = ({ open, onClose }) => {
       storage: 1,
       price: 1,
       is_recommended: false,
-      offer:0,
+
     },
   });
 

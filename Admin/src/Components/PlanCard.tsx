@@ -32,7 +32,7 @@ const PlanCard = () => {
           {/* Price and Duration */}
           <div className="mb-4">
             <h2 className="text-lg font-bold text-[var(--mainred)]">
-              ${plan.price} / {plan.plan_time} days
+              ${plan.price} / {plan.plan_time} Year
             </h2>
             {Number(plan.offer) > 0 && (
               <p className="text-sm text-green-600">
@@ -53,13 +53,7 @@ const PlanCard = () => {
             </li>
           </ul>
 
-          {/* Active Users (access_num) */}
-          <p className="text-sm text-gray-600 font-medium">
-            Active Users:{" "}
-            <span className="font-bold text-[var(--black)]">
-              {plan.access_num}
-            </span>
-          </p>
+      
         </div>
       ))}
     </div>
