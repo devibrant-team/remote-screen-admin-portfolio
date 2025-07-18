@@ -1,129 +1,256 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useFilterUsersQuery } from "../Redux/Slices/getuserSlice";
+import { fetchUserScreens } from "../Redux/Slices/userScreenSlice";
+import type { User } from "../Interface/Interfaces";
+import BaseModal from "../Components/Models/BaseModal";
+import { useSearchUsersQuery } from "../Redux/Slices/userSearchSlice";
+import { useDebounce } from "../Redux/Slices/hooks/useDebounce";
 
 const Screens = () => {
   const [plan_id, setPlan] = useState("0");
-  const [join, setJoin] = useState<string | undefined>(undefined);
-
+  const [year, setYear] = useState("");
+  const [month, setMonth] = useState("");
   const [page, setPage] = useState(1);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
 
-  const queryParams = { plan_id, join, page };
-  console.log("Sending to API:", queryParams); 
+  const join = useMemo(() => {
+    if (year || month) return `${year}-${month.padStart(2, "0")}`;
+    return undefined;
+  }, [year, month]);
 
-  const { data, isLoading, error } = useFilterUsersQuery(queryParams);
+  const { data, isLoading } = useFilterUsersQuery({ plan_id, join, page });
+  const users = data?.users ?? [];
+  const lastPage = data?.last_page ?? 1;
 
-  const users = data?.data || [];
-  const lastPage = data?.last_page || 1;
+  const {
+    data: searchResult,
+    isLoading: isSearchLoading,
+    error: searchError,
+  } = useSearchUsersQuery(
+    { query: debouncedSearch.trim() },
+    { skip: !debouncedSearch.trim() }
+  );
 
-  // Generate join options (YYYY-MM) from 2023 to current month of 2025
-  const joinOptions = (() => {
-    const options: { value: string; label: string }[] = [];
-    for (let year = 2023; year <= 2025; year++) {
-      for (let month = 1; month <= 12; month++) {
-        const now = new Date();
-        const isFuture =
-          year === now.getFullYear() && month > now.getMonth() + 1;
-        if (year > now.getFullYear() || isFuture) continue;
+  const {
+    data: screens = [],
+    isLoading: screensLoading,
+    isError: screensError,
+  } = useQuery({
+    queryKey: ["screens", selectedUser?.id],
+    queryFn: () => fetchUserScreens(selectedUser!.id),
+    enabled: !!selectedUser,
+  });
 
-        const value = `${year}-${String(month).padStart(2, "0")}`;
-        const label = `${new Date(0, month - 1).toLocaleString("default", {
-          month: "long",
-        })} ${year}`;
-        options.push({ value, label });
-      }
-    }
-    return options;
-  })();
+  const handleCheckScreens = (user: User) => {
+    setSelectedUser(user);
+    setModalOpen(true);
+  };
 
   return (
     <div className="p-4">
-      {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-4">
-        {/* Plan Filter */}
-        <select
-          value={plan_id}
-          onChange={(e) => {
-            setPlan(e.target.value);
-            setPage(1);
-          }}
-          className="border p-2 rounded"
-        >
-          <option value="0">All Plans</option>
-          <option value="1">Plan 1</option>
-          <option value="2">Plan 2</option>
-        </select>
+      {/* Search + Filters */}
+      <div className="flex flex-wrap justify-between items-center gap-4 my-10">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search users by name or email"
+          className="border p-2 rounded flex-1 min-w-[200px]"
+        />
 
-        {/* Joined Date Filter (Year + Month) */}
-        <select
-          value={join || ""}
-          onChange={(e) => {
-            const value = e.target.value;
-            setJoin(value === "" ? undefined : value);
-            setPage(1);
-          }}
-          className="border p-2 rounded"
-        >
-          <option value="">All Dates</option>
-          {joinOptions.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <div className="flex gap-4">
+          <select
+            value={plan_id}
+            onChange={(e) => setPlan(e.target.value)}
+            className="border p-2 rounded"
+          >
+            <option value="0">All Plans</option>
+            <option value="1">Plan 1</option>
+            <option value="2">Plan 2</option>
+          </select>
+
+          <select
+            value={year}
+            onChange={(e) => {
+              setYear(e.target.value);
+              setMonth("");
+            }}
+            className="border p-2 rounded"
+          >
+            <option value="">Year</option>
+            {[2023, 2024, 2025].map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            className="border p-2 rounded"
+            disabled={!year}
+          >
+            <option value="">Month</option>
+            {Array.from({ length: 12 }, (_, i) => ({
+              label: new Date(0, i).toLocaleString("default", { month: "long" }),
+              value: String(i + 1).padStart(2, "0"),
+            })).map(({ label, value }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Table */}
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p>Error loading data</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border">
-            <thead>
-              <tr className="bg-gray-100">
+      {/* User Table */}
+      {debouncedSearch.trim() ? (
+        isSearchLoading ? (
+          <p>Searching...</p>
+        ) : searchError ? (
+          <p className="text-red-500">Error while searching users.</p>
+        ) : searchResult?.user?.length ? (
+          <table className="w-full border">
+            <thead className="bg-gray-100">
+              <tr>
                 <th className="p-2 border">ID</th>
                 <th className="p-2 border">Name</th>
+                <th className="p-2 border">Email</th>
                 <th className="p-2 border">Plan</th>
-                <th className="p-2 border">Joined Date</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user: any) => (
-                <tr key={user.id}>
-                  <td className="p-2 border">{user.id}</td>
-                  <td className="p-2 border">{user.name}</td>
-                  <td className="p-2 border">{user.plan}</td>
-                  <td className="p-2 border">{user.joined_date}</td>
+              {searchResult.user.map((u: any, i: number) => (
+                <tr key={u.id} className={i % 2 ? "bg-gray-50" : ""}>
+                  <td className="p-2 border">{u.id}</td>
+                  <td className="p-2 border">{u.name}</td>
+                  <td className="p-2 border">{u.email}</td>
+                  <td className="p-2 border">{u.plan}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        ) : (
+          <p className="text-gray-500">No users found for this search.</p>
+        )
+      ) : isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <table className="w-full border">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 border">ID</th>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Plan</th>
+              <th className="p-2 border">Joined</th>
+              <th className="p-2 border">Screens</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.id}>
+                <td className="p-2 border">{user.id}</td>
+                <td className="p-2 border">{user.name}</td>
+                <td className="p-2 border">{user.plan_name}</td>
+                <td className="p-2 border">{user.joined}</td>
+                <td className="p-2 border">
+                  <button
+                    onClick={() => handleCheckScreens(user)}
+                    className="w-full h-full bg-[var(--mainred)] text-white px-3 py-1 rounded hover:bg-red-700 cursor-pointer"
+                  >
+                    Check
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {/* Pagination (only when not searching) */}
+      {!debouncedSearch.trim() && (
+        <div className="flex items-center justify-between mt-4">
+          <button
+            onClick={() => setPage((p) => p - 1)}
+            disabled={page <= 1}
+            className="px-3 py-1 border rounded"
+          >
+            Prev
+          </button>
+          <span>
+            Page {page} of {lastPage}
+          </span>
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={page >= lastPage}
+            className="px-3 py-1 border rounded"
+          >
+            Next
+          </button>
         </div>
       )}
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between mt-4">
-        <button
-          disabled={page <= 1}
-          onClick={() => setPage((prev) => prev - 1)}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
-
-        <span className="mx-2 text-sm">
-          Page {page} of {lastPage}
-        </span>
-
-        <button
-          disabled={page >= lastPage}
-          onClick={() => setPage((prev) => prev + 1)}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
+      {/* Modal */}
+      <BaseModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="User Screens"
+      >
+        {screensLoading ? (
+          <p>Loading screens...</p>
+        ) : screensError ? (
+          <p className="text-red-500">Failed to load screens.</p>
+        ) : screens.length > 0 ? (
+          <table className="w-full border text-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-2 border">ID</th>
+                <th className="p-2 border">Type</th>
+                <th className="p-2 border">Ratio</th>
+                <th className="p-2 border">Is Extra</th>
+              </tr>
+            </thead>
+            <tbody>
+              {screens.map((screen, idx) => (
+                <tr
+                  key={screen.id}
+                  className={`${
+                    idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  } hover:bg-blue-50 transition duration-150`}
+                >
+                  <td className="p-3 border text-center font-medium text-sm text-gray-700">
+                    {screen.id}
+                  </td>
+                  <td className="p-3 border text-center text-sm text-gray-600">
+                    {screen.type}
+                  </td>
+                  <td className="p-3 border text-center text-sm text-gray-600">
+                    {screen.ratio}
+                  </td>
+                  <td className="p-3 border text-center text-sm">
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        screen.isExtra
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-200 text-red-600"
+                      }`}
+                    >
+                      {screen.isExtra ? "Yes" : "No"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No screens assigned to this user.</p>
+        )}
+      </BaseModal>
     </div>
   );
 };

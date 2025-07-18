@@ -20,3 +20,29 @@ export interface PlanFormData {
   is_recommended?: boolean;
   offer?: number;
 }
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  plan_name: string;
+  joined: string;
+  screens: Screen[];
+}
+export interface Screen {
+  id: string;
+  type: string;
+  ratio: string;
+  isExtra: boolean;
+}
+
+export interface FilterUsersParams {
+  plan_id?: string;
+  join?: string | null;
+  page?: number;
+}
+
+export interface FilterUsersResponse {
+  users: User[];
+  last_page: number;
+}
