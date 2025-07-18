@@ -5,7 +5,8 @@ import LoginScreen from "./Screens/LoginScreen";
 import PlanScreen from "./Screens/PlanScreen";
 import DashboardScreen from "./Screens/DashboardScreen";
 import type { RootState } from "../store";
-
+import UserScreens from "./Screens/UserScreens";
+import Screens from "./Screens/Screens";
 export const App = () => {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
 
@@ -23,6 +24,8 @@ export const App = () => {
             <>
               <Route path="/dashboard" element={<DashboardScreen />} />
               <Route path="/plans" element={<PlanScreen />} />
+              <Route path="/users" element={<UserScreens />} />
+                     <Route path="/screens" element={<Screens />} />
               <Route path="*" element={<Navigate to="/dashboard" />} />
             </>
           )}
