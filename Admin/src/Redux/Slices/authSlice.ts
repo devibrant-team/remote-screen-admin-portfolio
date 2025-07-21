@@ -1,7 +1,7 @@
 // Redux/Slices/authSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-
+import { loginApi, logoutApi } from "../../API/API";
 interface AuthState {
   isLoggedIn: boolean;
   loading: boolean;
@@ -21,7 +21,7 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (credentials: { email: string; password: string }, thunkAPI) => {
     try {
-      const response = await axios.post("http://192.168.10.107:8000/api/login", credentials);
+      const response = await axios.post(loginApi, credentials);
       const token = response.data.token;
       localStorage.setItem("token", token);
       return token;
@@ -37,9 +37,8 @@ export const logoutUser = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const token = localStorage.getItem("token");
-      // Optional: Call logout API here later
       await axios.post(
-        "http://192.168.10.107:8000/api/logout", // <- update this when available
+       logoutApi, 
         {},
         {
           headers: {

@@ -11,6 +11,12 @@ export interface Plan {
   created_at: string | null;
   updated_at: string | null;
 }
+export interface CustomPlan {
+  id: number;
+  type: string;
+  price: number;
+  quantity: number;
+}
 export interface PlanFormData {
   name: string;
   screen_number: number;
@@ -45,4 +51,32 @@ export interface FilterUsersParams {
 export interface FilterUsersResponse {
   users: User[];
   last_page: number;
+}
+
+export interface DashboardOverView {
+  Total_users: number;
+  Total_Screens: number;
+  Total_Income: string;
+  Total_storage: string;
+}
+
+export interface ScreensOverview {
+  total: number;
+  android: number;
+  android_stick: number;
+  windows: number;
+}
+
+export interface ScreenStatusoverview {
+  active: number;
+  not_active: number;
+}
+export interface SinglePlan {
+  id: number;
+  name: string;
+  user_count: number;
+}
+
+export interface PlanOverview {
+  plans: SinglePlan[];
 }

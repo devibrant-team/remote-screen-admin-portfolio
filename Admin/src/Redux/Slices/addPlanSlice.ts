@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { PlanFormData } from "../../Interface/Interfaces";
-
+import { addPlanAPI } from "../../API/API";
 export const insertPlan = createAsyncThunk(
   "plans/insertPlan",
   async (formData: PlanFormData, { rejectWithValue }) => {
@@ -9,7 +9,7 @@ export const insertPlan = createAsyncThunk(
       const token = localStorage.getItem("token");
       console.log(token)
       const response = await axios.post(
-        "http://192.168.10.107:8000/api/insertplan",
+        addPlanAPI,
         formData,
         {
           headers: {

@@ -113,10 +113,10 @@ const Screens = () => {
         isSearchLoading ? (
           <p>Searching...</p>
         ) : searchError ? (
-          <p className="text-red-500">Error while searching users.</p>
+          <p className="text-[var(--mainred)]">Error while searching users.</p>
         ) : searchResult?.user?.length ? (
           <table className="w-full border">
-            <thead className="bg-gray-100">
+            <thead className="bg-[var(--white-200)]">
               <tr>
                 <th className="p-2 border">ID</th>
                 <th className="p-2 border">Name</th>
@@ -126,7 +126,7 @@ const Screens = () => {
             </thead>
             <tbody>
               {searchResult.user.map((u: any, i: number) => (
-                <tr key={u.id} className={i % 2 ? "bg-gray-50" : ""}>
+                <tr key={u.id} className={i % 2 ? "bg-[var(--white-200)]" : ""}>
                   <td className="p-2 border">{u.id}</td>
                   <td className="p-2 border">{u.name}</td>
                   <td className="p-2 border">{u.email}</td>
@@ -142,7 +142,7 @@ const Screens = () => {
         <p>Loading...</p>
       ) : (
         <table className="w-full border">
-          <thead className="bg-gray-100">
+          <thead className="bg-[var(--white-200)]">
             <tr>
               <th className="p-2 border">ID</th>
               <th className="p-2 border">Name</th>
@@ -161,7 +161,7 @@ const Screens = () => {
                 <td className="p-2 border">
                   <button
                     onClick={() => handleCheckScreens(user)}
-                    className="w-full h-full bg-[var(--mainred)] text-white px-3 py-1 rounded hover:bg-red-700 cursor-pointer"
+                    className="w-full h-full bg-[var(--mainred)] text-[var(--white)] px-3 py-1 rounded hover:bg-[var(--mainred)] cursor-pointer"
                   >
                     Check
                   </button>

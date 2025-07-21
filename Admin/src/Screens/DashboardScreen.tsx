@@ -1,6 +1,19 @@
+import { useQuery } from "@tanstack/react-query";
 import DashboardCard from "../Components/DashboardCard";
+import type { PlanOverview } from "../Interface/Interfaces";
+import { fetchPlanOverview } from "../Redux/Slices/PlanOverViewSlice";
 
 const DashboardScreen = () => {
+  const {
+    data: planData,
+    isLoading: screenLoading,
+    isError: screenIsError,
+  } = useQuery<PlanOverview>({
+    queryKey: ["planoverview"],
+    queryFn: fetchPlanOverview,
+  });
+
+  console.log(planData);
   return (
     <div
       id="dashboard"
@@ -13,11 +26,7 @@ const DashboardScreen = () => {
         </h1>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-        <DashboardCard />
-        <DashboardCard />
-        <DashboardCard />
+      <div className="mb-10">
         <DashboardCard />
       </div>
 
@@ -40,14 +49,16 @@ const DashboardScreen = () => {
               </tr>
             </thead>
             <tbody>
-              <tr className="hover:bg-[var(--white-200)]">
-                <td className="border border-gray-200 px-4 py-2">Plan A</td>
-                <td className="border border-gray-200 px-4 py-2">202</td>
-              </tr>
-              <tr className="hover:bg-[var(--white-200)]">
-                <td className="border border-gray-200 px-4 py-2">Plan B</td>
-                <td className="border border-gray-200 px-4 py-2">721</td>
-              </tr>
+              {planData?.plans?.map((plan) => (
+                <tr key={plan.id} className="hover:bg-[var(--white-200)]">
+                  <td className="border border-gray-200 px-4 py-2 capitalize">
+                    {plan.name}
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2">
+                    {plan.user_count}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

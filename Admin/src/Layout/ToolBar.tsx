@@ -9,10 +9,10 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { logoutUser } from "../Redux/Slices/authSlice";
-import type { AppDispatch } from "../../store";
+import type { AppDispatch, RootState } from "../../store";
 
 const menuItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
@@ -28,6 +28,8 @@ const ToolBar = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { loading: isLoggingOut } = useSelector((state: RootState) => state.auth);
 
   const currentPath = location.pathname;
 
@@ -59,25 +61,32 @@ const ToolBar = () => {
           {menuItems.map(({ label, icon: Icon, path }) => {
             const isActive = currentPath.startsWith(path || "") && label !== "Logout";
 
+            const isLogout = label === "Logout";
+
             return (
               <button
                 key={label}
                 onClick={() => {
-                  if (label === "Logout") {
-                    handleLogout();
+                  if (isLogout) {
+                    if (!isLoggingOut) handleLogout();
                   } else if (path) {
                     navigate(path);
                     setIsOpen(false); // close sidebar on mobile
                   }
                 }}
+                disabled={isLogout && isLoggingOut}
                 className={`flex items-center gap-3 text-left px-4 py-2 rounded-md font-medium transition-colors ${
                   isActive
                     ? "bg-red-600 text-white"
                     : "bg-gray-100 text-black hover:bg-red-600 hover:text-white"
-                }`}
+                } ${isLogout && isLoggingOut ? "opacity-60 cursor-not-allowed" : ""}`}
               >
                 <Icon size={20} />
-                {label}
+                {isLogout && isLoggingOut ? (
+                  <span>Logging out...</span>
+                ) : (
+                  label
+                )}
               </button>
             );
           })}

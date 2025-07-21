@@ -2,9 +2,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginUser } from "../Redux/Slices/authSlice";
-import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../../store";
-// Schema definition with Zod
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../store";
+
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -14,6 +14,8 @@ type LoginFormInputs = z.infer<typeof loginSchema>;
 
 const LoginScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.auth);
+
   const {
     register,
     handleSubmit,
@@ -21,8 +23,9 @@ const LoginScreen = () => {
   } = useForm<LoginFormInputs>({
     resolver: zodResolver(loginSchema),
   });
+
   const onSubmit = (data: LoginFormInputs) => {
-    dispatch(loginUser(data)); 
+    dispatch(loginUser(data));
   };
 
   return (
@@ -41,11 +44,10 @@ const LoginScreen = () => {
               {...register("email")}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--mainred)] transition-all"
               placeholder="you@example.com"
+              disabled={loading}
             />
             {errors.email && (
-              <p className="text-sm text-red-600 mt-1">
-                {errors.email.message}
-              </p>
+              <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
             )}
           </div>
 
@@ -62,19 +64,28 @@ const LoginScreen = () => {
               {...register("password")}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[var(--mainred)] transition-all"
               placeholder="••••••••"
+              disabled={loading}
             />
             {errors.password && (
-              <p className="text-sm text-red-600 mt-1">
-                {errors.password.message}
-              </p>
+              <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
             )}
           </div>
 
+          {/* Server-side error message */}
+          {error && (
+            <p className="text-sm text-red-700 text-center mt-2">{error}</p>
+          )}
+
           <button
             type="submit"
-            className="w-full py-3 bg-[var(--mainred)] text-[var(--white)] rounded-lg hover:opacity-90 font-semibold transition-all"
+            disabled={loading}
+            className={`w-full py-3 rounded-lg font-semibold transition-all ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed text-gray-700"
+                : "bg-[var(--mainred)] text-[var(--white)] hover:opacity-90"
+            }`}
           >
-            Sign In
+            {loading ? "Signing In..." : "Sign In"}
           </button>
         </form>
       </div>

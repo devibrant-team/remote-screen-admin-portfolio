@@ -8,7 +8,6 @@ export const getuserApi = createApi({
     baseUrl: "http://192.168.10.107:8000/api/",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
-      console.log(token)
       if (token) headers.set("Authorization", `Bearer ${token}`);
       return headers;
     },

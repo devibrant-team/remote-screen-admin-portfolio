@@ -9,8 +9,36 @@ const PlanCard = () => {
     queryFn: fetchPlans,
   });
 
-  if (isLoading) return <p>Loading plans...</p>;
-  if (isError) return <p>Error: {(error as Error).message}</p>;
+  if (isLoading) {
+    // Skeleton placeholders
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 3 }).map((_, idx) => (
+          <div
+            key={idx}
+            className="animate-pulse bg-gray-100 p-6 rounded-2xl shadow border border-gray-300"
+          >
+            <div className="h-5 w-1/2 bg-gray-300 rounded mb-4"></div>
+            <div className="h-4 w-1/3 bg-gray-300 rounded mb-2"></div>
+            <div className="h-4 w-1/4 bg-gray-300 rounded mb-4"></div>
+            <div className="space-y-2">
+              <div className="h-3 w-2/3 bg-gray-300 rounded"></div>
+              <div className="h-3 w-1/2 bg-gray-300 rounded"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="bg-red-100 text-red-800 border border-red-300 p-4 rounded-xl shadow-md max-w-md mx-auto mt-4">
+        <p className="font-semibold">Failed to load plans:</p>
+        <p>{(error as Error).message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -35,9 +63,7 @@ const PlanCard = () => {
               ${plan.price} / {plan.plan_time} Year
             </h2>
             {Number(plan.offer) > 0 && (
-              <p className="text-sm text-green-600">
-                Offer: -${plan.offer}
-              </p>
+              <p className="text-sm text-green-600">Offer: -${plan.offer}</p>
             )}
           </div>
 
@@ -52,8 +78,6 @@ const PlanCard = () => {
               {plan.storage} GB Storage
             </li>
           </ul>
-
-      
         </div>
       ))}
     </div>

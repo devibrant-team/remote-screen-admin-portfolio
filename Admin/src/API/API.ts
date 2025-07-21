@@ -1,0 +1,12 @@
+const http =  "http://192.168.10.138:8000/api/";
+export const addPlanAPI =`${http}insertplan`
+export const loginApi = `${http}login`
+export const getplanApi = `${http}getplan`
+export const extraplanApi = `${http}getcustom`
+export const getuserscreenApi = `${http}userscreen`
+export const logoutApi = `${http}logout`
+export const dashboardoverviewApi = `${http}overview`
+export const ScreensOverviewApi = `${http}screenstatic`
+export const ScreenStatusOverviewApi = `${http}screenStatus`
+export const PlanOverviewApi = `${http}planoverview`
+export const EditMainPlanApi = `${http}updateplan`
