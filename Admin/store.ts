@@ -7,10 +7,12 @@ import { userApi } from "./src/Redux/Slices/userSearchSlice";
 import { getuserApi } from "./src/Redux/Slices/getuserSlice";
 import incomeOverviewReducer from "./src/Redux/Slices/incomeSlice";
 import customPlanReducer from"./src/Redux/Slices/EditSlices/EditCustomPlanSlice";
+import plansFilterReducer from "./src/Redux/Slices/getPlansFilter";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     plans: planReducer,
+    filteredplans:plansFilterReducer,
     statType: statTypeReducer,
     incomeOverview:incomeOverviewReducer,
     customPlan: customPlanReducer,

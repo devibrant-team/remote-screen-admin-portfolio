@@ -1,27 +1,35 @@
-import { useQuery } from "@tanstack/react-query";
-import type { ScreensOverview, ScreenStatusoverview } from "../Interface/Interfaces";
+import { useEffect, useState } from "react";
 import { fetchScreensoverview } from "../Redux/Slices/screentypeSlice";
 import { fetchScreenStatusOverview } from "../Redux/Slices/ScreenStatusSlice";
+import type { ScreenStatusoverview } from "../Interface/Interfaces";
+
+type ScreenItem = { name: string; value: number };
 
 const Screens = () => {
-  const { data, isLoading, isError } = useQuery<ScreensOverview>({
-    queryKey: ["dashboard-overview"],
-    queryFn: fetchScreensoverview,
-    refetchOnMount: "always",
-  });
+  const [screensData, setScreensData] = useState<ScreenItem[] | null>(null);
+  const [screenStatusData, setScreenStatusData] =
+    useState<ScreenStatusoverview | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const {
-    data: screenData,
-    isLoading: screenLoading,
-    isError: screenIsError,
-  } = useQuery<ScreenStatusoverview>({
-    queryKey: ["screensstatus"],
-    queryFn: fetchScreenStatusOverview,
-      refetchOnMount: true,
-  });
+  useEffect(() => {
+    const fetchAll = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const screens = await fetchScreensoverview();
+        const status = await fetchScreenStatusOverview();
+        setScreensData(screens);
+        setScreenStatusData(status);
+      } catch (err: any) {
+        setError(err.message || "Failed to load data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loading = isLoading || screenLoading;
-  const error = isError || screenIsError;
+    fetchAll();
+  }, []);
 
   const skeletonCard = (
     <div className="bg-white rounded-2xl shadow p-4 sm:p-5 animate-pulse">
@@ -53,25 +61,34 @@ const Screens = () => {
 
       {error && (
         <div className="text-center text-red-600 bg-red-100 p-4 rounded-md mt-4">
-          Failed to load screen data. Please try again later.
+          {error}
         </div>
       )}
 
       {!loading && !error && (
         <>
           {/* Screen Type Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
-            {[
-              { label: "Total Screens", value: data?.total },
-              { label: "Windows Screens", value: data?.windows },
-              { label: "Android Screens", value: data?.android },
-              { label: "LED Screens", value: data?.android_stick },
-            ].map((item, i) => (
-              <div key={i} className="bg-[var(--white)] rounded-2xl shadow p-4 sm:p-5">
-                <p className="text-xs sm:text-sm text-gray-500">{item.label}</p>
-                <h2 className="text-2xl sm:text-3xl font-bold text-[var(--black)]">
-                  {item.value }
-                </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-10">
+            {screensData?.map(({ name, value }) => (
+              <div
+                key={name}
+                className="
+        bg-white 
+        rounded-3xl 
+        shadow-md 
+        p-6 
+        sm:p-8 
+        flex flex-col justify-center items-start
+        hover:shadow-lg 
+        transition-shadow 
+        duration-300
+        cursor-default
+      "
+              >
+                <h4 className="font-semibold text-lg text-gray-600 mb-2 tracking-wide">
+                  {name}
+                </h4>
+                <p className="text-2xl font-extrabold text-gray-900">{value}</p>
               </div>
             ))}
           </div>
@@ -81,13 +98,15 @@ const Screens = () => {
             <div className="bg-[var(--white)] rounded-2xl shadow p-4 sm:p-5">
               <p className="text-xs sm:text-sm text-gray-500">Active Screens</p>
               <h2 className="text-2xl sm:text-3xl font-bold text-green-600">
-                {screenData?.active }
+                {screenStatusData?.active}
               </h2>
             </div>
             <div className="bg-[var(--white)] rounded-2xl shadow p-4 sm:p-5">
-              <p className="text-xs sm:text-sm text-gray-500">Inactive Screens</p>
+              <p className="text-xs sm:text-sm text-gray-500">
+                Inactive Screens
+              </p>
               <h2 className="text-2xl sm:text-3xl font-bold text-[var(--mainred)]">
-                {screenData?.not_active }
+                {screenStatusData?.not_active}
               </h2>
             </div>
           </div>

@@ -1,11 +1,12 @@
 // Redux/Slices/getuserSlice.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { FilterUsersParams, FilterUsersResponse } from "../../Interface/Interfaces";
+import { http } from "../../API/API";
 
 export const getuserApi = createApi({
   reducerPath: "usersplan",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://192.168.10.107:8000/api/",
+    baseUrl: http,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) headers.set("Authorization", `Bearer ${token}`);

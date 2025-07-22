@@ -6,8 +6,12 @@ import type { User } from "../Interface/Interfaces";
 import BaseModal from "../Components/Models/BaseModal";
 import { useSearchUsersQuery } from "../Redux/Slices/userSearchSlice";
 import { useDebounce } from "../Redux/Slices/hooks/useDebounce";
-
+import { fetchFilteredPlans } from "../Redux/Slices/getPlansFilter";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState, AppDispatch } from "../../store";
 const Screens = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const [plan_id, setPlan] = useState("0");
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
@@ -16,6 +20,14 @@ const Screens = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
+  useEffect(() => {
+    dispatch(fetchFilteredPlans());
+  }, [dispatch]);
+  const {
+    data: plans,
+    loading,
+    error,
+  } = useSelector((state: RootState) => state.filteredplans);
 
   const join = useMemo(() => {
     if (year || month) return `${year}-${month.padStart(2, "0")}`;
@@ -23,6 +35,7 @@ const Screens = () => {
   }, [year, month]);
 
   const { data, isLoading } = useFilterUsersQuery({ plan_id, join, page });
+
   const users = data?.users ?? [];
   const lastPage = data?.last_page ?? 1;
 
@@ -49,6 +62,25 @@ const Screens = () => {
     setSelectedUser(user);
     setModalOpen(true);
   };
+  const UserSkeletonRow = () => (
+    <tr className="animate-pulse">
+      <td className="p-2 border">
+        <div className="h-4 bg-gray-300 rounded w-8 mx-auto" />
+      </td>
+      <td className="p-2 border">
+        <div className="h-4 bg-gray-300 rounded w-24 mx-auto" />
+      </td>
+      <td className="p-2 border">
+        <div className="h-4 bg-gray-300 rounded w-20 mx-auto" />
+      </td>
+      <td className="p-2 border">
+        <div className="h-4 bg-gray-300 rounded w-20 mx-auto" />
+      </td>
+      <td className="p-2 border">
+        <div className="h-8 bg-gray-300 rounded w-16 mx-auto" />
+      </td>
+    </tr>
+  );
 
   return (
     <div className="p-4">
@@ -66,11 +98,14 @@ const Screens = () => {
           <select
             value={plan_id}
             onChange={(e) => setPlan(e.target.value)}
-            className="border p-2 rounded"
+            className="border p-2 rounded-md shadow-sm text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--mainred)]"
           >
             <option value="0">All Plans</option>
-            <option value="1">Plan 1</option>
-            <option value="2">Plan 2</option>
+            {plans?.map((plan) => (
+              <option key={plan.id} value={plan.id}>
+                {plan.name}
+              </option>
+            ))}
           </select>
 
           <select
@@ -79,7 +114,7 @@ const Screens = () => {
               setYear(e.target.value);
               setMonth("");
             }}
-            className="border p-2 rounded"
+            className="border p-2 rounded-md shadow-sm text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--mainred)]"
           >
             <option value="">Year</option>
             {[2023, 2024, 2025].map((y) => (
@@ -92,12 +127,14 @@ const Screens = () => {
           <select
             value={month}
             onChange={(e) => setMonth(e.target.value)}
-            className="border p-2 rounded"
+            className="border p-2 rounded-md shadow-sm text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[var(--mainred)]"
             disabled={!year}
           >
             <option value="">Month</option>
             {Array.from({ length: 12 }, (_, i) => ({
-              label: new Date(0, i).toLocaleString("default", { month: "long" }),
+              label: new Date(0, i).toLocaleString("default", {
+                month: "long",
+              }),
               value: String(i + 1).padStart(2, "0"),
             })).map(({ label, value }) => (
               <option key={value} value={value}>
@@ -139,7 +176,22 @@ const Screens = () => {
           <p className="text-gray-500">No users found for this search.</p>
         )
       ) : isLoading ? (
-        <p>Loading...</p>
+        <table className="w-full border">
+          <thead className="bg-[var(--white-200)]">
+            <tr>
+              <th className="p-2 border">ID</th>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Plan</th>
+              <th className="p-2 border">Joined</th>
+              <th className="p-2 border">Screens</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <UserSkeletonRow key={idx} />
+            ))}
+          </tbody>
+        </table>
       ) : (
         <table className="w-full border">
           <thead className="bg-[var(--white-200)]">

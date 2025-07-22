@@ -61,10 +61,11 @@ export interface DashboardOverView {
 }
 
 export interface ScreensOverview {
-  total: number;
-  android: number;
-  android_stick: number;
-  windows: number;
+  success: boolean;
+  data: {
+    name: string;
+    value: number;
+  }[];
 }
 
 export interface ScreenStatusoverview {
@@ -85,4 +86,8 @@ export interface IncomebyPlan {
   name: string;
   user_count: number;
   total_income: number;
+}
+export interface PlanFilter {
+  id: number;
+  name: string;
 }

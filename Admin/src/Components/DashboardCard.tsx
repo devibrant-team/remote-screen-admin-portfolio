@@ -1,14 +1,29 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Users, Monitor, DollarSign, Database } from "lucide-react";
 import type { DashboardOverView } from "../Interface/Interfaces";
 import { fetchDashboardOverView } from "../Redux/Slices/getDashboardOverviewSlice";
 
 const DashboardCard = () => {
-  const { data, isLoading, isError, error } = useQuery<DashboardOverView>({
-    queryKey: ["dashboard-overview"],
-    queryFn: fetchDashboardOverView,
-    refetchOnMount: "always",
-  });
+  const [data, setData] = useState<DashboardOverView | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await fetchDashboardOverView();
+        setData(result);
+      } catch (err: any) {
+        setError(err.message || "Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const skeletonCard = (
     <div className="bg-white rounded-2xl shadow-md p-6 animate-pulse">
@@ -20,7 +35,7 @@ const DashboardCard = () => {
     </div>
   );
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -32,10 +47,10 @@ const DashboardCard = () => {
     );
   }
 
-  if (isError) {
+  if (error) {
     return (
       <div className="text-center text-red-500 py-10 bg-red-100 rounded-md mx-4">
-        Error loading dashboard data: {(error as Error).message}
+        Error loading dashboard data: {error}
       </div>
     );
   }
