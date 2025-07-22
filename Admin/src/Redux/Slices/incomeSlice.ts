@@ -32,10 +32,9 @@ export const fetchIncomeOverview = createAsyncThunk<
       "http://192.168.10.138:8000/api/incomeoverview",
      payload,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+       headers: {
+        Authorization: `Bearer ${token}`,
+      },
       }
     );
     console.log("Params", payload);
