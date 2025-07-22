@@ -7,16 +7,35 @@ const DashboardCard = () => {
   const { data, isLoading, isError, error } = useQuery<DashboardOverView>({
     queryKey: ["dashboard-overview"],
     queryFn: fetchDashboardOverView,
+    refetchOnMount: "always",
   });
-  console.log(data);
+
+  const skeletonCard = (
+    <div className="bg-white rounded-2xl shadow-md p-6 animate-pulse">
+      <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
+      <div className="flex items-center justify-between">
+        <div className="h-6 bg-gray-300 rounded w-1/3"></div>
+        <div className="h-7 w-7 bg-gray-200 rounded-full"></div>
+      </div>
+    </div>
+  );
+
   if (isLoading) {
-    return <div className="text-center py-10 text-gray-500">Loading...</div>;
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx}>{skeletonCard}</div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (isError) {
     return (
-      <div className="text-center text-red-500 py-10">
-        Error: {(error as Error).message}
+      <div className="text-center text-red-500 py-10 bg-red-100 rounded-md mx-4">
+        Error loading dashboard data: {(error as Error).message}
       </div>
     );
   }

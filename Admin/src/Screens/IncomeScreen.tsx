@@ -13,16 +13,17 @@ const IncomeScreen = () => {
   const selectedStatType = useSelector(
     (state: RootState) => state.statType.selected
   );
-const {
-  data: incomebyplan,
-  isLoading: screenLoading,
-  isError: screenIsError,
-} = useQuery<IncomebyPlan[]>({
-  queryKey: ["incomebyplan"],
-  queryFn: fetchIncomebyPlan,
-});
 
-  console.log("HEHHE",incomebyplan);
+  const {
+    data: incomebyplan,
+    isLoading: screenLoading,
+    isError: screenIsError,
+    error,
+  } = useQuery<IncomebyPlan[]>({
+    queryKey: ["incomebyplan"],
+    queryFn: fetchIncomebyPlan,
+  });
+
   const statOptions = [
     { label: "Day", value: "day" },
     { label: "Month", value: "month" }, // backend not handled yet
@@ -87,21 +88,52 @@ const {
         <h2 className="text-xl font-bold text-[var(--black)] mb-6">
           Income by Plan
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-10 text-sm">
-    {incomebyplan?.map((plan) => (
-  <div key={plan.id} className="flex items-start gap-4">
-    <div className="h-3 w-3 mt-1 rounded-full bg-blue-500" />
-    <div>
-      <div className="text-gray-600 font-medium">{plan.name}</div>
-      <div className="text-[var(--black)] text-lg font-semibold">
-        ${plan.total_income.toLocaleString()}
-      </div>
-    </div>
-  </div>
-)) ?? <p>No data found</p>}
 
-      
-        </div>
+        {/* Loading */}
+        {screenLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-10">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-4 animate-pulse">
+                <div className="h-3 w-3 mt-1 rounded-full bg-gray-300" />
+                <div className="space-y-2 w-full">
+                  <div className="h-3 w-2/3 bg-gray-200 rounded" />
+                  <div className="h-5 w-1/3 bg-gray-300 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error */}
+        {screenIsError && (
+          <div className="text-red-600 bg-red-100 px-4 py-3 rounded-md text-sm">
+            Failed to load income by plan.{" "}
+            {typeof error === "string"
+              ? error
+              : (error as Error)?.message || ""}
+          </div>
+        )}
+
+        {/* Success */}
+        {!screenLoading && !screenIsError && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-10 text-sm">
+            {incomebyplan && incomebyplan.length > 0 ? (
+              incomebyplan.map((plan) => (
+                <div key={plan.id} className="flex items-start gap-4">
+                  <div className="h-3 w-3 mt-1 rounded-full bg-blue-500" />
+                  <div>
+                    <div className="text-gray-600 font-medium">{plan.name}</div>
+                    <div className="text-[var(--black)] text-lg font-semibold">
+                      ${plan.total_income.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 col-span-full">No data found.</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

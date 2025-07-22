@@ -3,9 +3,10 @@ import BaseModal from "./BaseModal";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDispatch, useSelector, type UseDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store";
 import { insertPlan } from "../../Redux/Slices/addPlanSlice";
+import { useQueryClient } from "@tanstack/react-query";
 type PlanModalProps = {
   open: boolean;
   onClose: () => void;
@@ -25,6 +26,7 @@ type PlanFormValues = z.infer<typeof planSchema>;
 const PlanModal: React.FC<PlanModalProps> = ({ open, onClose }) => {
   const [successMessage, setSuccessMessage] = React.useState("");
   const dispatch = useDispatch<AppDispatch>();
+    const queryClient = useQueryClient();
   const { loading, error, success } = useSelector(
     (state: RootState) => state.plans
   );
@@ -42,16 +44,15 @@ const PlanModal: React.FC<PlanModalProps> = ({ open, onClose }) => {
       storage: 1,
       price: 1,
       is_recommended: false,
-
     },
   });
 
   const onSubmit = async (data: PlanFormValues) => {
-  const result = await dispatch(insertPlan({ ...data, offer: 0 }));
-
+    const result = await dispatch(insertPlan({ ...data, offer: 0 }));
 
     if (insertPlan.fulfilled.match(result)) {
       reset();
+      queryClient.invalidateQueries({ queryKey: ["plans"] });
       onClose();
     } else {
       console.error("Error submitting plan:", result.payload);
@@ -88,7 +89,9 @@ const PlanModal: React.FC<PlanModalProps> = ({ open, onClose }) => {
             min={1}
           />
           {errors.screen_number && (
-            <p className="text-sm text-red-500">{errors.screen_number.message}</p>
+            <p className="text-sm text-red-500">
+              {errors.screen_number.message}
+            </p>
           )}
         </div>
 
