@@ -1,67 +1,53 @@
 import React, { useState } from "react";
 import BaseModal from "./BaseModal";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../../../store";
+import { updateCustomPlan } from "../../Redux/Slices/EditSlices/EditCustomPlanSlice";
+import { useQueryClient } from "@tanstack/react-query";
 
 type StorageModalProps = {
   open: boolean;
   onClose: () => void;
+  id: number;
 };
 
-const StorageModal: React.FC<StorageModalProps> = ({ open, onClose }) => {
+const StorageModal: React.FC<StorageModalProps> = ({ open, onClose, id }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const queryClient = useQueryClient();
+
   const [form, setForm] = useState({
-    name: "",
     price: "",
-    unit: "GB",
   });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitted Storage:", form);
-    onClose();
+    setIsLoading(true);
+    try {
+      await dispatch(updateCustomPlan({ id, price: parseFloat(form.price) })).unwrap();
+      console.log("Updated storage successfully");
+      queryClient.invalidateQueries({ queryKey: ["custom"] });
+      onClose();
+    } catch (err) {
+      console.error("Failed to update storage:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <BaseModal open={open} onClose={onClose} title="Add Extra Storage">
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Unit Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Unit Type</label>
-          <div className="flex gap-4">
-            {["GB", "Screen"].map((unit) => (
-              <label key={unit} className="flex items-center gap-2 text-[var(--black)] text-lg">
-                <input
-                  type="radio"
-                  name="unit"
-                  value={unit}
-                  checked={form.unit === unit}
-                  onChange={handleChange}
-                  className="accent-[var(--mainred)] w-6 h-6 sm:w-7 sm:h-7"
-                />
-                {unit}
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Name</label>
-          <input
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full border p-2 rounded-md"
-            required
-          />
-        </div>
-
-        {/* Price */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Price ($)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Price ($)
+          </label>
           <input
             name="price"
             value={form.price}
@@ -69,14 +55,38 @@ const StorageModal: React.FC<StorageModalProps> = ({ open, onClose }) => {
             type="number"
             className="w-full border p-2 rounded-md"
             required
+            disabled={isLoading}
           />
         </div>
 
         <button
           type="submit"
-          className="bg-[var(--mainred)] text-white px-4 py-2 rounded-md hover:brightness-90 transition"
+          className="bg-[var(--mainred)] text-white px-4 py-2 rounded-md hover:brightness-90 transition flex justify-center items-center"
+          disabled={isLoading}
         >
-          Save
+          {isLoading ? (
+            <svg
+              className="animate-spin h-5 w-5 mr-2 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+          ) : null}
+          {isLoading ? "Saving..." : "Save"}
         </button>
       </form>
     </BaseModal>

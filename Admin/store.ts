@@ -2,15 +2,18 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./src/Redux/Slices/authSlice";
 import planReducer from "./src/Redux/Slices/addPlanSlice";
-import planModalReducer from "./src/Redux/Slices/EditMainPlanPost";
+import statTypeReducer from './src/Redux/Slices/statTypeSlice';
 import { userApi } from "./src/Redux/Slices/userSearchSlice";
 import { getuserApi } from "./src/Redux/Slices/getuserSlice";
-
+import incomeOverviewReducer from "./src/Redux/Slices/incomeSlice";
+import customPlanReducer from"./src/Redux/Slices/EditSlices/EditCustomPlanSlice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     plans: planReducer,
-    planModal: planModalReducer,
+    statType: statTypeReducer,
+    incomeOverview:incomeOverviewReducer,
+    customPlan: customPlanReducer,
     [userApi.reducerPath]: userApi.reducer,
     [getuserApi.reducerPath]: getuserApi.reducer,
   },

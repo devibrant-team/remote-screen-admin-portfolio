@@ -80,3 +80,9 @@ export interface SinglePlan {
 export interface PlanOverview {
   plans: SinglePlan[];
 }
+export interface IncomebyPlan {
+  id: number;
+  name: string;
+  user_count: number;
+  total_income: number;
+}

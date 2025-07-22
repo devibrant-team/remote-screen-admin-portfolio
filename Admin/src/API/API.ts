@@ -10,3 +10,5 @@ export const ScreensOverviewApi = `${http}screenstatic`
 export const ScreenStatusOverviewApi = `${http}screenStatus`
 export const PlanOverviewApi = `${http}planoverview`
 export const EditMainPlanApi = `${http}updateplan`
+export const EditCustomPlanApi = `${http}updatecustom`
+export const GetIncomebyPlanApi = `${http}getAllPlansWithUserPricing`

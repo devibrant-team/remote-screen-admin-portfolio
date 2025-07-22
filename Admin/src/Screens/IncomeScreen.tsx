@@ -1,14 +1,50 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setStatType } from "../Redux/Slices/statTypeSlice";
+import { fetchIncomeOverview } from "../Redux/Slices/incomeSlice";
+import type { RootState, AppDispatch } from "../../store";
 import IncomeCard from "../Components/IncomeCard";
+import { useQuery } from "@tanstack/react-query";
+import type { IncomebyPlan } from "../Interface/Interfaces";
+import { fetchIncomebyPlan } from "../Redux/Slices/getIncomebyPlan";
 
 const IncomeScreen = () => {
-  const [selectedStatType, setSelectedStatType] = useState("month");
+  const dispatch = useDispatch<AppDispatch>();
+  const selectedStatType = useSelector(
+    (state: RootState) => state.statType.selected
+  );
+const {
+  data: incomebyplan,
+  isLoading: screenLoading,
+  isError: screenIsError,
+} = useQuery<IncomebyPlan[]>({
+  queryKey: ["incomebyplan"],
+  queryFn: fetchIncomebyPlan,
+});
 
+  console.log("HEHHE",incomebyplan);
   const statOptions = [
     { label: "Day", value: "day" },
-    { label: "Week", value: "week" },
-    { label: "Month", value: "month" },
+    { label: "Month", value: "month" }, // backend not handled yet
+    { label: "Year", value: "year" },
   ];
+
+  const getDateParams = (type: string) => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+
+    if (type === "day") return { day };
+    if (type === "month") return { month };
+    if (type === "year") return { year };
+    return {};
+  };
+
+  useEffect(() => {
+    const params = getDateParams(selectedStatType);
+    dispatch(fetchIncomeOverview(params));
+  }, [selectedStatType, dispatch]);
 
   return (
     <div
@@ -26,7 +62,9 @@ const IncomeScreen = () => {
           {statOptions.map((option) => (
             <button
               key={option.value}
-              onClick={() => setSelectedStatType(option.value)}
+              onClick={() =>
+                dispatch(setStatType(option.value as "day" | "month" | "year"))
+              }
               className={`px-4 py-1.5 text-sm font-medium rounded-md ${
                 selectedStatType === option.value
                   ? "bg-[var(--mainred)] text-white"
@@ -40,51 +78,29 @@ const IncomeScreen = () => {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-        <IncomeCard />
-        <IncomeCard />
-        <IncomeCard />
+      <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-5 mb-10 justify-center">
         <IncomeCard />
       </div>
 
-      {/* Income by Plan - Full Width Section */}
+      {/* Income by Plan */}
       <div className="w-full bg-[var(--white)] shadow-md rounded-xl p-6 sm:p-8 border border-[var(--white-200)]">
         <h2 className="text-xl font-bold text-[var(--black)] mb-6">
           Income by Plan
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-10 text-sm">
-          {/* Basic Plan */}
-          <div className="flex items-start gap-4">
-            <div className="h-3 w-3 mt-1 rounded-full bg-blue-500" />
-            <div>
-              <div className="text-gray-600 font-medium">Basic Plan</div>
-              <div className="text-[var(--black)] text-lg font-semibold">
-                $28,470
-              </div>
-            </div>
-          </div>
+    {incomebyplan?.map((plan) => (
+  <div key={plan.id} className="flex items-start gap-4">
+    <div className="h-3 w-3 mt-1 rounded-full bg-blue-500" />
+    <div>
+      <div className="text-gray-600 font-medium">{plan.name}</div>
+      <div className="text-[var(--black)] text-lg font-semibold">
+        ${plan.total_income.toLocaleString()}
+      </div>
+    </div>
+  </div>
+)) ?? <p>No data found</p>}
 
-          {/* Standard Plan */}
-          <div className="flex items-start gap-4">
-            <div className="h-3 w-3 mt-1 rounded-full bg-green-500" />
-            <div>
-              <div className="text-gray-600 font-medium">Standard Plan</div>
-              <div className="text-[var(--black)] text-lg font-semibold">
-                $45,230
-              </div>
-            </div>
-          </div>
-
-          {/* Premium Plan */}
-          <div className="flex items-start gap-4">
-            <div className="h-3 w-3 mt-1 rounded-full bg-purple-600" />
-            <div>
-              <div className="text-gray-600 font-medium">Premium Plan</div>
-              <div className="text-[var(--black)] text-lg font-semibold">
-                $78,910
-              </div>
-            </div>
-          </div>
+      
         </div>
       </div>
     </div>

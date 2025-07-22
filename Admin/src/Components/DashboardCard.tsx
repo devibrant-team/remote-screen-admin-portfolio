@@ -8,13 +8,17 @@ const DashboardCard = () => {
     queryKey: ["dashboard-overview"],
     queryFn: fetchDashboardOverView,
   });
-
+  console.log(data);
   if (isLoading) {
     return <div className="text-center py-10 text-gray-500">Loading...</div>;
   }
 
   if (isError) {
-    return <div className="text-center text-red-500 py-10">Error: {(error as Error).message}</div>;
+    return (
+      <div className="text-center text-red-500 py-10">
+        Error: {(error as Error).message}
+      </div>
+    );
   }
 
   const cards = [
@@ -50,7 +54,9 @@ const DashboardCard = () => {
           >
             <h2 className="text-sm text-gray-500 mb-2">{card.title}</h2>
             <div className="flex items-center justify-between">
-              <h3 className="text-3xl font-bold text-[var(--black)]">{card.value}</h3>
+              <h3 className="text-3xl font-bold text-[var(--black)]">
+                {card.value}
+              </h3>
               {card.icon}
             </div>
           </div>

@@ -52,9 +52,9 @@ const PlanCard = () => {
             <h3 className="text-xl font-semibold text-[var(--black)] capitalize">
               {plan.name}
             </h3>
-            <button className="text-blue-600 hover:text-blue-800 transition">
+            {/* <button className="text-blue-600 hover:text-blue-800 transition">
               <Pencil size={18} />
-            </button>
+            </button> */}
           </div>
 
           {/* Price and Duration */}

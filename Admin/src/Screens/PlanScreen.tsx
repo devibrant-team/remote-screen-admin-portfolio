@@ -1,17 +1,22 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import PlanModal from "../Components/Models/PlanModal";
 import StorageModal from "../Components/Models/StorageModal";
 import PlanCard from "../Components/PlanCard";
-import { useState } from "react";
 import type { CustomPlan } from "../Interface/Interfaces";
-import { useQuery } from "@tanstack/react-query";
 import { fetchExtraPlans } from "../Redux/Slices/getExtraPlan";
 
 const PlanScreen = () => {
   const [planOpen, setPlanOpen] = useState(false);
   const [storageOpen, setStorageOpen] = useState(false);
+  const [selectedStorageId, setSelectedStorageId] = useState<number | null>(null);
 
   const openPlanModal = () => setPlanOpen(true);
-  const openStorageModal = () => setStorageOpen(true);
+
+  const openStorageModal = (id: number) => {
+    setSelectedStorageId(id);
+    setStorageOpen(true);
+  };
 
   const {
     data,
@@ -61,7 +66,7 @@ const PlanScreen = () => {
               Array.from({ length: 2 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="animate-pulse bg-gray-100 p-5 rounded-xl shadow  flex flex-col items-center text-center"
+                  className="animate-pulse bg-gray-100 p-5 rounded-xl shadow flex flex-col items-center text-center"
                 >
                   <div className="h-4 w-1/3 bg-gray-300 rounded mb-2" />
                   <div className="h-6 w-1/2 bg-gray-300 rounded mb-4" />
@@ -88,7 +93,7 @@ const PlanScreen = () => {
                   ${extraplan.price}
                 </p>
                 <button
-                  onClick={openStorageModal}
+                  onClick={() => openStorageModal(extraplan.id)}
                   className="bg-[var(--mainred)] text-[var(--white)] px-5 py-2.5 rounded-lg shadow-md hover:brightness-90 transition-all"
                 >
                   Edit
@@ -101,7 +106,17 @@ const PlanScreen = () => {
 
       {/* Modals */}
       <PlanModal open={planOpen} onClose={() => setPlanOpen(false)} />
-      <StorageModal open={storageOpen} onClose={() => setStorageOpen(false)} />
+
+      {selectedStorageId !== null && (
+        <StorageModal
+          open={storageOpen}
+          onClose={() => {
+            setStorageOpen(false);
+            setSelectedStorageId(null);
+          }}
+          id={selectedStorageId}
+        />
+      )}
     </div>
   );
 };
