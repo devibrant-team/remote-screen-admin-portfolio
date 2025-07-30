@@ -16,6 +16,7 @@ const Screens = () => {
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
   const [page, setPage] = useState(1);
+  const [isPageChanging, setIsPageChanging] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [search, setSearch] = useState("");
@@ -35,6 +36,18 @@ const Screens = () => {
   }, [year, month]);
 
   const { data, isLoading } = useFilterUsersQuery({ plan_id, join, page });
+  useEffect(() => {
+    setIsPageChanging(true);
+  }, [page]);
+
+  useEffect(() => {
+    if (!isLoading && data?.users) {
+      const timeout = setTimeout(() => {
+        setIsPageChanging(false);
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading, data]);
 
   const users = data?.users ?? [];
   const lastPage = data?.last_page ?? 1;
@@ -144,14 +157,69 @@ const Screens = () => {
           </select>
         </div>
       </div>
-
-      {/* User Table */}
-      {debouncedSearch.trim() ? (
-        isSearchLoading ? (
-          <p>Searching...</p>
-        ) : searchError ? (
-          <p className="text-[var(--mainred)]">Error while searching users.</p>
-        ) : searchResult?.user?.length ? (
+      <div
+        className={`transition-opacity duration-300 ${
+          isPageChanging ? "opacity-50 pointer-events-none" : "opacity-100"
+        }`}
+      >
+        {/* User Table */}
+        {debouncedSearch.trim() ? (
+          isSearchLoading ? (
+            <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+              <svg
+                className="animate-spin h-4 w-4 text-gray-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                />
+              </svg>
+              <span>Searching users...</span>
+            </div>
+          ) : searchError ? (
+            <p className="text-[var(--mainred)]">
+              Error while searching users.
+            </p>
+          ) : searchResult?.user?.length ? (
+            <table className="w-full border">
+              <thead className="bg-[var(--white-200)]">
+                <tr>
+                  <th className="p-2 border">ID</th>
+                  <th className="p-2 border">Name</th>
+                  <th className="p-2 border">Email</th>
+                  <th className="p-2 border">Plan</th>
+                </tr>
+              </thead>
+              <tbody>
+                {searchResult.user.map((u: any, i: number) => (
+                  <tr
+                    key={u.id}
+                    className={i % 2 ? "bg-[var(--white-200)]" : ""}
+                  >
+                    <td className="p-2 border">{u.id}</td>
+                    <td className="p-2 border">{u.name}</td>
+                    <td className="p-2 border">{u.email}</td>
+                    <td className="p-2 border">{u.plan}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-gray-500">No users found for this search.</p>
+          )
+        ) : isLoading ? (
           <table className="w-full border">
             <thead className="bg-[var(--white-200)]">
               <tr>
@@ -159,71 +227,50 @@ const Screens = () => {
                 <th className="p-2 border">Name</th>
                 <th className="p-2 border">Email</th>
                 <th className="p-2 border">Plan</th>
+                <th className="p-2 border">Joined</th>
+                <th className="p-2 border">Screens</th>
               </tr>
             </thead>
             <tbody>
-              {searchResult.user.map((u: any, i: number) => (
-                <tr key={u.id} className={i % 2 ? "bg-[var(--white-200)]" : ""}>
-                  <td className="p-2 border">{u.id}</td>
-                  <td className="p-2 border">{u.name}</td>
-                  <td className="p-2 border">{u.email}</td>
-                  <td className="p-2 border">{u.plan}</td>
-                </tr>
+              {Array.from({ length: 5 }).map((_, idx) => (
+                <UserSkeletonRow key={idx} />
               ))}
             </tbody>
           </table>
         ) : (
-          <p className="text-gray-500">No users found for this search.</p>
-        )
-      ) : isLoading ? (
-        <table className="w-full border">
-          <thead className="bg-[var(--white-200)]">
-            <tr>
-              <th className="p-2 border">ID</th>
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">Plan</th>
-              <th className="p-2 border">Joined</th>
-              <th className="p-2 border">Screens</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: 5 }).map((_, idx) => (
-              <UserSkeletonRow key={idx} />
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <table className="w-full border">
-          <thead className="bg-[var(--white-200)]">
-            <tr>
-              <th className="p-2 border">ID</th>
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">Plan</th>
-              <th className="p-2 border">Joined</th>
-              <th className="p-2 border">Screens</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td className="p-2 border">{user.id}</td>
-                <td className="p-2 border">{user.name}</td>
-                <td className="p-2 border">{user.plan_name}</td>
-                <td className="p-2 border">{user.joined}</td>
-                <td className="p-2 border">
-                  <button
-                    onClick={() => handleCheckScreens(user)}
-                    className="w-full h-full bg-[var(--mainred)] text-[var(--white)] px-3 py-1 rounded hover:bg-[var(--mainred)] cursor-pointer"
-                  >
-                    Check
-                  </button>
-                </td>
+          <table className="w-full border">
+            <thead className="bg-[var(--white-200)]">
+              <tr>
+                <th className="p-2 border">ID</th>
+                <th className="p-2 border">Name</th>
+                <th className="p-2 border">Email</th>
+                <th className="p-2 border">Plan</th>
+                <th className="p-2 border">Joined</th>
+                <th className="p-2 border">Screens</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id}>
+                  <td className="p-2 border">{user.id}</td>
+                  <td className="p-2 border">{user.name}</td>
+                  <td className="p-2 border">{user.email}</td>
+                  <td className="p-2 border">{user.plan_name}</td>
+                  <td className="p-2 border">{user.joined}</td>
+                  <td className="p-2 border">
+                    <button
+                      onClick={() => handleCheckScreens(user)}
+                      className="w-full h-full bg-[var(--mainred)] text-[var(--white)] px-3 py-1 rounded hover:bg-[var(--mainred)] cursor-pointer"
+                    >
+                      Check
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
       {/* Pagination (only when not searching) */}
       {!debouncedSearch.trim() && (
         <div className="flex items-center justify-between mt-4">

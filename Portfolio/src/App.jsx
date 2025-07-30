@@ -1,10 +1,12 @@
-import React from 'react'
-import RegisterScreen from './Screens/RegisterScreen'
+import React from "react";
+import RegisterScreen from "./Screens/RegisterScreen";
 
 const App = () => {
   return (
-    <div><RegisterScreen/></div>
-  )
-}
+    <div>
+      <RegisterScreen />
+    </div>
+  );
+};
 
-export default App
+export default App;
