@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { signupApi } from "../API/API";
 
 // Async thunk to send registration data to backend (fake API)
 export const registerUser = createAsyncThunk(
@@ -7,7 +8,7 @@ export const registerUser = createAsyncThunk(
     console.log(name , email , password)
     try {
       const response = await fetch(
-       "https://srv964353.hstgr.cloud/api/portofolio/signup",
+      signupApi,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
