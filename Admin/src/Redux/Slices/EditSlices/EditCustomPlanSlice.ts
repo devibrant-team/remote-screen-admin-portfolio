@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
+import { UpdateCustom } from "../../../API/API";
 export const updateCustomPlan = createAsyncThunk(
   "customPlan/update",
   async (payload: { id: number; price: number  }, thunkAPI) => {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://192.168.10.138:8000/api/updatecustom/${payload.id}`, {
+      const res = await fetch(`${UpdateCustom}/${payload.id}`, {
         method: "PUT", 
         headers: {
           "Content-Type": "application/json",

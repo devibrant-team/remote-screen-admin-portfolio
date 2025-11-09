@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-import { addPlan } from "../../API/API";
+import { addAd } from "../../API/API";
 export const insertAds = createAsyncThunk(
   "ads/insertAds",
   async (formData: FormData, { rejectWithValue }) => {
@@ -9,7 +9,7 @@ export const insertAds = createAsyncThunk(
       const token = localStorage.getItem("token");
       console.log(token)
       const response = await axios.post(
-        addPlan,
+        addAd,
         formData,
         {
           headers: {

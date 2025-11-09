@@ -28,11 +28,14 @@ export interface PlanFormData {
 }
 
 export interface AdsFormData {
+  id:number;
   media: File;
   media_type:string
   description: string;
 }
-
+export type SelectedAd = AdsFormData & {
+  id: number | string;
+};
 export interface User {
   id: number;
   name: string;

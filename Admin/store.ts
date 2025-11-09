@@ -9,6 +9,7 @@ import { getuserApi } from "./src/Redux/Slices/getuserSlice";
 import incomeOverviewReducer from "./src/Redux/Slices/incomeSlice";
 import customPlanReducer from"./src/Redux/Slices/EditSlices/EditCustomPlanSlice";
 import plansFilterReducer from "./src/Redux/Slices/getPlansFilter";
+import adsUiReducer from "./src/Redux/Slices/adsUiSlice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -18,6 +19,7 @@ export const store = configureStore({
     statType: statTypeReducer,
     incomeOverview:incomeOverviewReducer,
     customPlan: customPlanReducer,
+      adsUi: adsUiReducer,
     [userApi.reducerPath]: userApi.reducer,
     [getuserApi.reducerPath]: getuserApi.reducer,
   },

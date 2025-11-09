@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
+import { Getincome } from "../../API/API";
 
 // Define parameters structure
 interface IncomeOverviewParams {
@@ -29,7 +30,7 @@ export const fetchIncomeOverview = createAsyncThunk<
 
     // ✅ Send flat object — NOT { params: { ... } }
     const response = await axios.post(
-      "http://192.168.10.138:8000/api/incomeoverview",
+      Getincome,
      payload,
       {
        headers: {
