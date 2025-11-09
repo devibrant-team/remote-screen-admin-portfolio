@@ -8,7 +8,8 @@ import type { RootState } from "../store";
 import UserScreens from "./Screens/UserScreens";
 import Screens from "./Screens/Screens";
 import IncomeScreen from "./Screens/IncomeScreen";
-import echo from './echo'
+// import echo from './echo'
+import Ads from "./Screens/Ads";
 export const App = () => {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
 
@@ -28,6 +29,7 @@ export const App = () => {
               <Route path="/users" element={<UserScreens />} />
               <Route path="/screens" element={<Screens />} />
               <Route path="/income" element={<IncomeScreen />} />
+              <Route path="/ads" element={<Ads />} />
               <Route path="*" element={<Navigate to="/dashboard" />} />
             </>
           )}

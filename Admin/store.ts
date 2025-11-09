@@ -2,6 +2,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./src/Redux/Slices/authSlice";
 import planReducer from "./src/Redux/Slices/addPlanSlice";
+import adsReducer from "./src/Redux/Slices/addAdsSlice";
 import statTypeReducer from './src/Redux/Slices/statTypeSlice';
 import { userApi } from "./src/Redux/Slices/userSearchSlice";
 import { getuserApi } from "./src/Redux/Slices/getuserSlice";
@@ -12,6 +13,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     plans: planReducer,
+    ads: adsReducer,
     filteredplans:plansFilterReducer,
     statType: statTypeReducer,
     incomeOverview:incomeOverviewReducer,

@@ -7,7 +7,7 @@ export const registerUser = createAsyncThunk(
     console.log(name , email , password)
     try {
       const response = await fetch(
-       "http://192.168.10.107/remote-screen-backend/public/api/portofolio/signup",
+       "https://srv964353.hstgr.cloud/api/portofolio/signup",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

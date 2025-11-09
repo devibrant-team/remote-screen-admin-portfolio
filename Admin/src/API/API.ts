@@ -1,7 +1,8 @@
-export const http =  "http://192.168.10.138:8000/api/";
+export const http =  "https://srv1005364.hstgr.cloud/api/";
 export const addPlanAPI =`${http}insertplan`
 export const loginApi = `${http}login`
 export const getplanApi = `${http}getplan`
+export const getAdsApi = `${http}getads`
 export const extraplanApi = `${http}getcustom`
 export const getuserscreenApi = `${http}userscreen`
 export const logoutApi = `${http}logout`
@@ -13,3 +14,4 @@ export const EditMainPlanApi = `${http}updateplan`
 export const EditCustomPlanApi = `${http}updatecustom`
 export const GetIncomebyPlanApi = `${http}getAllPlansWithUserPricing`
 export const GetPlansFilter = `${http}planName`
+export const addPlan = `${http}insertads`

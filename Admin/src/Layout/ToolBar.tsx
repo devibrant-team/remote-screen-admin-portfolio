@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   X,
+  Megaphone 
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -20,6 +21,7 @@ const menuItems = [
   { label: "Users", icon: Users, path: "/users" },
   { label: "Plans", icon: Layers, path: "/plans" },
   { label: "Income", icon: DollarSign, path: "/income" },
+  { label: "Ads", icon: Megaphone, path: "/Ads" },
   { label: "Logout", icon: LogOut },
 ];
 

@@ -27,6 +27,12 @@ export interface PlanFormData {
   offer?: number;
 }
 
+export interface AdsFormData {
+  media: File;
+  media_type:string
+  description: string;
+}
+
 export interface User {
   id: number;
   name: string;
